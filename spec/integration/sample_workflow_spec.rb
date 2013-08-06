@@ -61,9 +61,10 @@ describe SampleWorkflow do
 
       s3_bucket.objects[s3_path].read.should == { input_param: "some input", decision_param: "decision", activity_param: "activity"}.to_json
       try_soft_loud { s3_bucket.objects.with_prefix(test_run_identifier).each {|s3_object| s3_object.delete} }
-      try_soft_loud { Process.kill 'TERM', swf_runner_pid }
-    rescue
+    rescue AWS::Errors::MissingCredentialsError
       puts "NOTE: Not really running this test as we've got no AWS credentials"
+    ensure
+      try_soft_loud { Process.kill 'TERM', swf_runner_pid }
     end
   end
 end
